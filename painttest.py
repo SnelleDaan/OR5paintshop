@@ -26,3 +26,18 @@ machine_speed = {
     'M2': 15
 }
 
+'''calculate time of all orders with one machine'''
+
+ordercompleted = []
+totaltime = 0
+changetime = 0
+oldcolor = ''
+for order, surface, color, deadline, penalty in orders:
+    ordertime = surface/machine_speed['M1']
+    if color != oldcolor and oldcolor != '':
+        changetime = setup_times[oldcolor,color][0]
+    else:
+        changetime = 0
+    totaltime = totaltime + ordertime + changetime
+    oldcolor = color
+print(totaltime)
