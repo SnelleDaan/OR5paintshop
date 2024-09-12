@@ -1,3 +1,7 @@
+'''
+define example variables
+'''
+
 colors = ['red','yellow','blue']
 
 kleurwissels = [
@@ -26,14 +30,19 @@ machine_speed = {
     'M2': 15
 }
 
-'''calculate time of all orders with one machine'''
-
+'''
+calculate time of all orders with one machine
+'''
+#list of completed orders
+x1 = []
 ordercompleted = []
 totaltime = 0
 changetime = 0
 oldcolor = ''
 for order, surface, color, deadline, penalty in orders:
     ordertime = surface/machine_speed['M1']
+    x1.append(ordertime)
+    ordercompleted.append(order)
     if color != oldcolor and oldcolor != '':
         changetime = setup_times[oldcolor,color][0]
     else:
@@ -41,3 +50,12 @@ for order, surface, color, deadline, penalty in orders:
     totaltime = totaltime + ordertime + changetime
     oldcolor = color
 print(totaltime)
+
+'''
+visualisize the planning
+'''
+import matplotlib.pyplot as plt     # for visualization of the tours
+y1 = []
+for x in x1:
+    y1.append(1)
+plt.scatter(x1,y1)
