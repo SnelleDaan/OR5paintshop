@@ -23,11 +23,10 @@ for prev_color, current_color, interval in kleurwissels:
 # Order, Surface, Color, Deadline, Penalty
 orders = [(1, 10, 'yellow', 18, 10), (2, 5, 'red', 10, 2), (3, 15, 'blue', 20, 8)]
 
-machines = ['M1','M2']
-
-machine_speed = {
-    'M1': 10,
-    'M2': 15
+machines = {
+    'Machine1': {'speed': 10},  # m²/hour
+    'Machine2': {'speed': 15},
+    'Machine3': {'speed': 20}
 }
 
 '''
@@ -49,8 +48,15 @@ for order, surface, color, deadline, penalty in orders:
         changetime = 0
     totaltime = totaltime + ordertime + changetime
     oldcolor = color
-print(totaltime)
 
+def painttime(area, machine):
+    return area/ machine['speed']
+
+def switchtime(order, machine, current_color):
+    if current_color != order['color']:
+        return 
+    else:
+        return 0
 '''
 visualisize the planning
 '''
