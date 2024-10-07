@@ -23,9 +23,9 @@ for prev_color, current_color, interval in kleurwissels:
 
 # Order, area, Color, Deadline, Penalty
 orders = [
-    {'area': 100, 'color': 'red'},   # Order 1: 100 m² of red paint
-    {'area': 150, 'color': 'blue'},  # Order 2: 150 m² of blue paint
-    {'area': 80, 'color': 'red'}     # Order 3: 80 m² of red paint
+    {'order': 1,'area': 100, 'color': 'red'},   # Order 1: 100 m² of red paint
+    {'order': 2,'area': 150, 'color': 'blue'},  # Order 2: 150 m² of blue paint
+    {'order': 3,'area': 80, 'color': 'red'}     # Order 3: 80 m² of red paint
 ]
 
 
@@ -72,9 +72,9 @@ def schedule_orders(orders, machines):
             if completion_time < best_time:
                 best_time = completion_time
                 best_machine = machine_name
-        
+        # Schudule format = 'Order index,   machine,    start time
+        schedule.append([order['order'], best_machine, machine_states[best_machine]['available_time']])
         # Update the chosen machine state
-        schedule.append({'order': order, 'machine': best_machine, 'start_time': machine_states[best_machine]['available_time']})
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['color']
     
