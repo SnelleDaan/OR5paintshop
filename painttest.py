@@ -23,9 +23,9 @@ for prev_color, current_color, interval in kleurwissels:
 
 # Order, area, Color, Deadline, Penalty
 orders = [
-    {'order': 1,'area': 100, 'color': 'red'},   # Order 1: 100 m² of red paint
-    {'order': 2,'area': 150, 'color': 'blue'},  # Order 2: 150 m² of blue paint
-    {'order': 3,'area': 80, 'color': 'red'}     # Order 3: 80 m² of red paint
+    {'order': 1,'area': 100, 'color': 'red'},   
+    {'order': 2,'area': 150, 'color': 'blue'}, 
+    {'order': 3,'area': 80, 'color': 'red'}     
 ]
 
 
@@ -49,9 +49,6 @@ def switchtime(prev_color, current_color):
     if (prev_color, current_color) in setup_times:
         return setup_times[(prev_color, current_color)]
     return 0
-'''
-visualisize the planning
-'''
 
 
 def schedule_orders(orders, machines):
