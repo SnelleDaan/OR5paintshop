@@ -23,9 +23,16 @@ for prev_color, current_color, interval in kleurwissels:
 
 # Order, area, Color, Deadline, Penalty
 orders = [
-    {'order': 1,'area': 100, 'color': 'red'},   
-    {'order': 2,'area': 150, 'color': 'blue'}, 
-    {'order': 3,'area': 80, 'color': 'red'}     
+    {'order': 1,'area': 100, 'color': 'red', 'deadline': 12, 'penalty': 5},   
+    {'order': 2,'area': 150, 'color': 'blue', 'deadline': 15, 'penalty': 0}, 
+    {'order': 3,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 4,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 5,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 6,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 7,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9},
+    {'order': 8,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 9,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}, 
+    {'order': 10,'area': 80, 'color': 'red', 'deadline': 12, 'penalty': 9}  
 ]
 
 
@@ -69,12 +76,23 @@ def schedule_orders(orders, machines):
             if completion_time < best_time:
                 best_time = completion_time
                 best_machine = machine_name
-        # Schudule format = 'Order index,   machine,    start time
-        schedule.append([order['order'], best_machine, machine_states[best_machine]['available_time']])
+        # Schudule format = 'Order index,   machine,    end time
+        schedule.append([order['order'], best_machine, completion_time])
         # Update the chosen machine state
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['color']
     
     return schedule
 
-print(schedule_orders(orders, machines))
+schedule1 = schedule_orders(orders, machines)
+
+def calculate_penalty(orders, schedule):
+    penalty = 0
+    for order in orders:
+        for entry in schedule:
+            time_finish = entry[2]
+            if order['deadline'] < time_finish and entry[0]==order['order']:
+                penalty = penalty + order['penalty']
+    return penalty
+print(schedule1)
+print(calculate_penalty(orders, schedule1))
