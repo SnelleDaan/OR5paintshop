@@ -70,11 +70,12 @@ def schedule_orders(orders, machines):
                 best_machine = machine_name
                 best_start_time = start_time
                 best_paint_time = paint_time
+                best_switch_time = switch_time
 
 
                 
         # Schudule format = 'Order index,   machine,      end time,       colour,          duration,    start time
-        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time])
+        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time+best_switch_time])
         # Update the chosen machine state
         machine_time[machine_to_index(best_machine)] = best_time
         machine_states[best_machine]['available_time'] = best_time
