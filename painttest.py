@@ -108,11 +108,10 @@ def calculate_penalty(orders, schedule):
             if order['Deadline'] < time_finish and entry[0]==order['Order']:
                 penalty = penalty + order['Penalty'] * (time_finish - order['Deadline'])
     return penalty
-calculate_penalty1 = calculate_penalty(orders, schedule1_O)
+penalty1 = calculate_penalty(orders, schedule1_O)
 
 machine_schedules = convert_sched_O_to_sched_M(schedule1_O)
 
-print(machine_schedules)
 
 def draw_schedule(schedule):
     # schedule has to be of machince type
@@ -137,5 +136,5 @@ def draw_schedule(schedule):
     plt.grid(axis='x', linestyle='--', alpha=0.7)
     plt.tight_layout()
     return plt.show()
-
 draw_schedule(machine_schedules)
+print(penalty1)
