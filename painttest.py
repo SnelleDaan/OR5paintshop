@@ -55,24 +55,28 @@ def schedule_orders(orders, machines):
     for order in orders:
         best_machine = None
         best_time = float('inf')
+        best_start_time = None
         
         for machine_name, machine_data in machines.items():
             current_machine = machine_states[machine_name]
             switch_time = switchtime(current_machine['current_color'], order['Colour']) 
             paint_time = painttime(order['Surface'], machine_name, machines)
             time_to_complete = switch_time + paint_time
-            machine_time[machine_to_index(machine_name)] = machine_time[machine_to_index(machine_name)] + time_to_complete
             start_time = machine_time[machine_to_index(machine_name)]
             completion_time = start_time + time_to_complete
             
             if completion_time < best_time:
                 best_time = completion_time
                 best_machine = machine_name
+                best_start_time = start_time
+                best_paint_time = paint_time
+
 
                 
-        # Schudule format = 'Order index,   machine,      end time,            colour,          duration,    start time
-        schedule_O.append([order['Order'], best_machine, completion_time, order['Colour'], paint_time, start_time])
+        # Schudule format = 'Order index,   machine,      end time,       colour,          duration,    start time
+        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time])
         # Update the chosen machine state
+        machine_time[machine_to_index(best_machine)] = best_time
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['Colour']
     return schedule_O
