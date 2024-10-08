@@ -35,7 +35,8 @@ def switchtime(prev_color, current_color):
 
 
 def schedule_orders(orders, machines):
-    schedule = []
+    schedule_O = []
+
     machine_states = {machine: {'current_color': None, 'available_time': 0} for machine in machines}
     
     for order in orders:
@@ -53,14 +54,24 @@ def schedule_orders(orders, machines):
                 best_time = completion_time
                 best_machine = machine_name
         # Schudule format = 'Order index,   machine,    end time
-        schedule.append([order['Order'], best_machine, completion_time])
+        schedule_O.append([order['Order'], best_machine, completion_time])
         # Update the chosen machine state
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['Colour']
-    
-    return schedule
+    return schedule_O
 
 schedule1 = schedule_orders(orders, machines)
+
+def convert_sched_O_to_sched_M(schedule_O):
+    schedule_M = [ [], [], []]
+    for entry in schedule_O:
+        if entry[1] == 'M1':
+            schedule_M[0].append()
+        elif entry[1] == 'M2':
+            schedule_M[1].append()
+        elif entry[1] == 'M3':
+            schedule_M[2].append()
+    return schedule_M
 
 def calculate_penalty(orders, schedule):
     penalty = 0
