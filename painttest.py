@@ -1,3 +1,10 @@
+import pandas as pd
+
+df = pd.read_excel('PaintShop - September 2024.xlsx')
+
+orders_r  = df.to_dict(orient='records')
+
+print(orders_r)
 '''
 define example variables
 '''
