@@ -1,6 +1,7 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-file = 'PaintShop - November 2024'
+file = 'PaintShop - September 2024.xlsx'
 df = pd.read_excel(file, sheet_name=0)
 orders  = df.to_dict(orient='records')
 
@@ -54,24 +55,30 @@ def schedule_orders(orders, machines):
             if completion_time < best_time:
                 best_time = completion_time
                 best_machine = machine_name
-        # Schudule format = 'Order index,   machine,    end time
-        schedule_O.append([order['Order'], best_machine, completion_time])
+                start_time = machine_states[best_machine]['available_time']
+        # Schudule format = 'Order index,   machine, end time,            colour,          duration,    start time
+        schedule_O.append([order['Order'], best_machine, completion_time, order['Colour'], paint_time, start_time])
         # Update the chosen machine state
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['Colour']
     return schedule_O
 
-schedule1 = schedule_orders(orders, machines)
+schedule1_O = schedule_orders(orders, machines)
 
 def convert_sched_O_to_sched_M(schedule_O):
     schedule_M = [ [], [], []]
     for entry in schedule_O:
+        order_index = entry[0]
+        end_time = entry[2]
+        color = entry[3].lower()
+        duration = entry[4]
+        start_time = entry[5]
         if entry[1] == 'M1':
-            schedule_M[0].append()
+            schedule_M[0].append((order_index, end_time, color, duration, start_time))
         elif entry[1] == 'M2':
-            schedule_M[1].append()
+            schedule_M[1].append((order_index, end_time, color, duration, start_time))
         elif entry[1] == 'M3':
-            schedule_M[2].append()
+            schedule_M[2].append((order_index, end_time, color, duration, start_time))
     return schedule_M
 
 def calculate_penalty(orders, schedule):
@@ -82,5 +89,34 @@ def calculate_penalty(orders, schedule):
             if order['Deadline'] < time_finish and entry[0]==order['Order']:
                 penalty = penalty + order['Penalty'] * (time_finish - order['Deadline'])
     return penalty
-calculate_penalty1 = calculate_penalty(orders, schedule1)
-print(schedule1, calculate_penalty1)
+calculate_penalty1 = calculate_penalty(orders, schedule1_O)
+
+machine_schedules = convert_sched_O_to_sched_M(schedule1_O)
+
+print(machine_schedules)
+
+def draw_schedule(schedule):
+    # schedule has to be of machince type
+    # Create a figure and axis for plotting
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Loop through each machine's schedule
+    for i, machine_schedule in enumerate(machine_schedules):
+        for order_num, completion_time, color, duration, start_time in machine_schedule:
+            # Calculate the width (duration) of each order
+            width =  duration # The completion time is the total time spent on the order
+            ax.barh(i + 1, width, left=start_time, color=color, edgecolor='black', label=color if i == 0 else "")
+            ax.text(start_time + width / 2, i + 1, order_num, va='center', ha='center', color='white')  # Add order number to the bar
+
+    # Add labels and title
+    ax.set_yticks(range(1, len(machine_schedules) + 1))
+    ax.set_yticklabels([f'Machine {i+1}' for i in range(len(machine_schedules))])
+    ax.set_xlabel('Time')
+    ax.set_title('Gantt Chart of Orders for Each Machine')
+
+    # Show the plot
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    return plt.show()
+
+draw_schedule(machine_schedules)
