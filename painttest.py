@@ -1,14 +1,15 @@
 import pandas as pd
 
-df = pd.read_excel('PaintShop - September 2024.xlsx', sheet_name=0)
+file = 'PaintShop - November 2024'
+df = pd.read_excel(file, sheet_name=0)
 orders  = df.to_dict(orient='records')
 
-df2 = pd.read_excel('PaintShop - September 2024.xlsx', sheet_name=1)
+df2 = pd.read_excel(file, sheet_name=1)
 machines = {}
 for index, row in df2.iterrows():
     machines[row['Machine']] = {'speed': row['Speed']}
 
-df3 = pd.read_excel('PaintShop - September 2024.xlsx', sheet_name=2)
+df3 = pd.read_excel(file, sheet_name=2)
 kleurwissels = list(df3.itertuples(index=False, name=None))
 setup_times = {}
 for prev_color, current_color, interval in kleurwissels:
@@ -79,7 +80,7 @@ def calculate_penalty(orders, schedule):
         for entry in schedule:
             time_finish = entry[2]
             if order['Deadline'] < time_finish and entry[0]==order['Order']:
-                penalty = penalty + order['Penalty']
+                penalty = penalty + order['Penalty'] * (time_finish - order['Deadline'])
     return penalty
 calculate_penalty1 = calculate_penalty(orders, schedule1)
 print(schedule1, calculate_penalty1)
