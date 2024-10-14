@@ -42,7 +42,7 @@ def machine_to_index(Mx):
         return 1
     elif Mx == 'M3':
         return 2
-    elif Mx == 'Mx':
+    elif Mx == 'M4':
         return 3
         
 
@@ -92,12 +92,7 @@ def convert_sched_O_to_sched_M(schedule_O):
         color = entry[3].lower()
         duration = entry[4]
         start_time = entry[5]
-        if entry[1] == 'M1':
-            schedule_M[0].append((order_index, end_time, color, duration, start_time))
-        elif entry[1] == 'M2':
-            schedule_M[1].append((order_index, end_time, color, duration, start_time))
-        elif entry[1] == 'M3':
-            schedule_M[2].append((order_index, end_time, color, duration, start_time))
+        schedule_M[machine_to_index(entry[1])].append((order_index, end_time, color, duration, start_time))
     return schedule_M
 
 def calculate_penalty(orders, schedule):
@@ -137,4 +132,43 @@ def draw_schedule(schedule):
     plt.tight_layout()
     return plt.show()
 draw_schedule(machine_schedules)
+
+def swap_orders_optimization(orders, machines, max_iterations=1000):
+    current_orders = orders.copy()
+    current_schedule = schedule_orders(current_orders, machines)
+    current_penalty = calculate_penalty(current_orders, current_schedule)
+
+    for iteration in range(max_iterations):
+        improved = False
+
+        # Try swapping each pair of orders
+        for i in range(len(current_orders)):
+            for j in range(i + 1, len(current_orders)):
+                # Swap orders
+                current_orders[i], current_orders[j] = current_orders[j], current_orders[i]
+
+                # Calculate new schedule and penalty
+                new_schedule = schedule_orders(current_orders, machines)
+                new_penalty = calculate_penalty(current_orders, new_schedule)
+
+                # Accept the swap if it improves the penalty
+                if new_penalty < current_penalty:
+                    current_penalty = new_penalty
+                    current_schedule = new_schedule
+                    improved = True
+                else:
+                    # Swap back if not improving
+                    current_orders[i], current_orders[j] = current_orders[j], current_orders[i]
+
+        # If no improvements found in an iteration, we can stop
+        if not improved:
+            break
+
+    return current_schedule, current_penalty
+
+# Run the swap orders optimization
+optimized_schedule, optimized_penalty = swap_orders_optimization(orders, machines)
+
+draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
+print(f"Optimized penalty achieved: {optimized_penalty}")
 print(penalty1)
