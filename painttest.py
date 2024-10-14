@@ -77,7 +77,7 @@ def schedule_orders(orders, machines):
 
                 
         # Schudule format = 'Order index,   machine,      end time,       colour,          duration,    start time
-        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time+best_switch_time, order['Deadline']])
+        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'].lower(), best_paint_time, best_start_time+best_switch_time, order['Deadline']])
         # Update the chosen machine state
         machine_time[machine_to_index(best_machine)] = best_time
         machine_states[best_machine]['available_time'] = best_time
@@ -102,7 +102,8 @@ def convert_sched_M_to_sched_O(schedule_M):
     for i, entry in enumerate(schedule_M):
         for order_i, end_time, color, duration, start_time, deadline in entry:
             schedule_O.append([order_i, index_to_machine(i)[0], end_time, color, duration, start_time, deadline])
-    return schedule_O.sort(key=lambda x: machine_to_index(x[0]))
+    schedule_O.sort(key=lambda x: int(x[0][1:]))
+    return schedule_O
 
 schedule1_O = schedule_orders(orders, machines)
 sched = convert_sched_O_to_sched_M(schedule1_O)
