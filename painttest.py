@@ -107,8 +107,7 @@ def convert_sched_M_to_sched_O(schedule_M):
 
 schedule1_O = schedule_orders(orders, machines)
 sched = convert_sched_O_to_sched_M(schedule1_O)
-sched2 = convert_sched_M_to_sched_O(sched)
-print(schedule1_O, sched2)
+sched2 = convert_sched_M_to_sched_O(sched) 
 if schedule1_O == sched2:
     print('YIPPIE!')
     
