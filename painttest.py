@@ -106,10 +106,6 @@ def convert_sched_M_to_sched_O(schedule_M):
     return schedule_O
 
 schedule1_O = schedule_orders(orders, machines)
-sched = convert_sched_O_to_sched_M(schedule1_O)
-sched2 = convert_sched_M_to_sched_O(sched) 
-if schedule1_O == sched2:
-    print('YIPPIE!')
     
 def calculate_penalty(orders, schedule):
     penalty = 0
@@ -193,13 +189,15 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
 
     return current_schedule, current_penalty, improvement_list, iteration_list, count_iteration
 
-#def shuffle_schedule(schedule):
-#     for 
+def random_schedule(orders):
     
-#     return schedule_upd
+    random_orders = random.sample(len(orders), len(orders))
+
+    
+    return random_orders
 # Run the swap orders optimization
 optimized_schedule, optimized_penalty, list_of_improvement, list_iteration, count_it = swap_orders_optimization(orders, machines)
-
+random_schedule(orders)
 #draw_schedule(machine_schedules)
 # draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
 # #print(f"Optimized penalty achieved: {optimized_penalty}")
