@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import random
 
 file = 'PaintShop - November 2024.xlsx'
 df = pd.read_excel(file, sheet_name=0)
@@ -41,7 +43,10 @@ def machine_to_index(Mx):
         return 2
     elif Mx == 'M4':
         return 3
-        
+
+def index_to_machine(index):
+    return [f'M{index + 1}']
+
 
 def schedule_orders(orders, machines):
     schedule_O = []
@@ -79,7 +84,6 @@ def schedule_orders(orders, machines):
         machine_states[best_machine]['current_color'] = order['Colour']
     return schedule_O
 
-schedule1_O = schedule_orders(orders, machines)
 
 def convert_sched_O_to_sched_M(schedule_O):
     schedule_M = [ [], [], [], []]
@@ -93,6 +97,20 @@ def convert_sched_O_to_sched_M(schedule_O):
         schedule_M[machine_to_index(entry[1])].append((order_index, end_time, color, duration, start_time, deadline))
     return schedule_M
 
+def convert_sched_M_to_sched_O(schedule_M):
+    schedule_O = []
+    for i, entry in enumerate(schedule_M):
+        for order_i, end_time, color, duration, start_time, deadline in entry:
+            schedule_O.append([order_i, index_to_machine(i)[0], end_time, color, duration, start_time, deadline])
+    return schedule_O.sort(key=lambda x: machine_to_index(x[0]))
+
+schedule1_O = schedule_orders(orders, machines)
+sched = convert_sched_O_to_sched_M(schedule1_O)
+sched2 = convert_sched_M_to_sched_O(sched)
+print(schedule1_O, sched2)
+if schedule1_O == sched2:
+    print('YIPPIE!')
+    
 def calculate_penalty(orders, schedule):
     penalty = 0
     penalty_list = []
@@ -175,13 +193,20 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
 
     return current_schedule, current_penalty, improvement_list, iteration_list, count_iteration
 
+#def shuffle_schedule(schedule):
+#     for 
+    
+#     return schedule_upd
 # Run the swap orders optimization
 optimized_schedule, optimized_penalty, list_of_improvement, list_iteration, count_it = swap_orders_optimization(orders, machines)
 
 #draw_schedule(machine_schedules)
-draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
-#print(f"Optimized penalty achieved: {optimized_penalty}")
-print(penalty1, optimized_penalty, count_it)
-plt.scatter(list_iteration, list_of_improvement, marker='o')
-plt.title('Improvement per iteration')
-plt.show()
+# draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
+# #print(f"Optimized penalty achieved: {optimized_penalty}")
+# print(penalty1, optimized_penalty, count_it)
+# print(min(list_of_improvement))
+# plt.scatter(list_iteration, list_of_improvement, marker='o')
+# plt.title('Improvement per iteration')
+# plt.xlabel('iteration')
+# plt.ylabel('penalty')
+# plt.show()
