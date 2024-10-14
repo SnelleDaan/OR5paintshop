@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = 'PaintShop - September 2024.xlsx'
+file = 'PaintShop - November 2024.xlsx'
 df = pd.read_excel(file, sheet_name=0)
 orders  = df.to_dict(orient='records')
 
@@ -51,7 +51,7 @@ def schedule_orders(orders, machines):
 
     machine_states = {machine: {'current_color': None, 'available_time': 0} for machine in machines}
 
-    machine_time = [0,0,0]
+    machine_time = [0,0,0,0]
     for order in orders:
         best_machine = None
         best_time = float('inf')
@@ -85,7 +85,7 @@ def schedule_orders(orders, machines):
 schedule1_O = schedule_orders(orders, machines)
 
 def convert_sched_O_to_sched_M(schedule_O):
-    schedule_M = [ [], [], []]
+    schedule_M = [ [], [], [], []]
     for entry in schedule_O:
         order_index = entry[0]
         end_time = entry[2]
@@ -137,7 +137,9 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
     current_orders = orders.copy()
     current_schedule = schedule_orders(current_orders, machines)
     current_penalty = calculate_penalty(current_orders, current_schedule)
-
+    improvement_list= []
+    iteration_list = []
+    improvement_index = 0
     for iteration in range(max_iterations):
         improved = False
 
@@ -155,20 +157,29 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
                 if new_penalty < current_penalty:
                     current_penalty = new_penalty
                     current_schedule = new_schedule
+                    improvement_list.append(current_penalty)
+                    improvement_index += 1
+                    iteration_list.append(improvement_index)
                     improved = True
                 else:
                     # Swap back if not improving
                     current_orders[i], current_orders[j] = current_orders[j], current_orders[i]
+                    improvement_list.append(current_penalty)
+                    iteration_list.append(improvement_index)
 
         # If no improvements found in an iteration, we can stop
         if not improved:
             break
 
-    return current_schedule, current_penalty
+    return current_schedule, current_penalty, improvement_list, iteration_list
 
 # Run the swap orders optimization
-optimized_schedule, optimized_penalty = swap_orders_optimization(orders, machines)
+optimized_schedule, optimized_penalty, list_of_improvement, list_iteration = swap_orders_optimization(orders, machines)
+
+machine_schedules = convert_sched_O_to_sched_M(optimized_schedule)
 
 draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
 print(f"Optimized penalty achieved: {optimized_penalty}")
-print(penalty1)
+print(penalty1, optimized_penalty)
+plt.scatter(list_iteration, list_of_improvement, marker='o')
+plt.show()
