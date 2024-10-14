@@ -15,10 +15,7 @@ kleurwissels = list(df3.itertuples(index=False, name=None))
 setup_times = {}
 for prev_color, current_color, interval in kleurwissels:
     color_pair = (prev_color, current_color)
-    color_pair2 = (current_color, prev_color)
     setup_times[color_pair] = interval
-    setup_times[color_pair2] = interval
-
 
 
 def painttime(area, machine, machines):
@@ -75,7 +72,7 @@ def schedule_orders(orders, machines):
 
                 
         # Schudule format = 'Order index,   machine,      end time,       colour,          duration,    start time
-        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time+best_switch_time])
+        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time+best_switch_time, order['Deadline']])
         # Update the chosen machine state
         machine_time[machine_to_index(best_machine)] = best_time
         machine_states[best_machine]['available_time'] = best_time
@@ -92,16 +89,19 @@ def convert_sched_O_to_sched_M(schedule_O):
         color = entry[3].lower()
         duration = entry[4]
         start_time = entry[5]
-        schedule_M[machine_to_index(entry[1])].append((order_index, end_time, color, duration, start_time))
+        deadline = entry[6]
+        schedule_M[machine_to_index(entry[1])].append((order_index, end_time, color, duration, start_time, deadline))
     return schedule_M
 
 def calculate_penalty(orders, schedule):
     penalty = 0
+    penalty_list = []
     for order in orders:
         for entry in schedule:
             time_finish = entry[2]
             if order['Deadline'] < time_finish and entry[0]==order['Order']:
                 penalty = penalty + order['Penalty'] * (time_finish - order['Deadline'])
+                penalty_list.append((order['Penalty'] * (time_finish - order['Deadline']),order['Order']))
     return penalty
 penalty1 = calculate_penalty(orders, schedule1_O)
 
@@ -114,16 +114,16 @@ def draw_schedule(schedule):
     fig, ax = plt.subplots(figsize=(12, 6))
 
     # Loop through each machine's schedule
-    for i, machine_schedule in enumerate(machine_schedules):
-        for order_num, completion_time, color, duration, start_time in machine_schedule:
+    for i, machine_schedule in enumerate(schedule):
+        for order_num, completion_time, color, duration, start_time,deadline in machine_schedule:
             # Calculate the width (duration) of each order
             width =  duration # The completion time is the total time spent on the order
             ax.barh(i + 1, width, left=start_time, color=color, edgecolor='black', label=color if i == 0 else "")
             ax.text(start_time + width / 2, i + 1, order_num, va='center', ha='center', color='white')  # Add order number to the bar
 
     # Add labels and title
-    ax.set_yticks(range(1, len(machine_schedules) + 1))
-    ax.set_yticklabels([f'Machine {i+1}' for i in range(len(machine_schedules))])
+    ax.set_yticks(range(1, len(schedule) + 1))
+    ax.set_yticklabels([f'Machine {i+1}' for i in range(len(schedule))])
     ax.set_xlabel('Time')
     ax.set_title('Gantt Chart of Orders for Each Machine')
 
@@ -131,7 +131,7 @@ def draw_schedule(schedule):
     plt.grid(axis='x', linestyle='--', alpha=0.7)
     plt.tight_layout()
     return plt.show()
-draw_schedule(machine_schedules)
+
 
 def swap_orders_optimization(orders, machines, max_iterations=1000):
     current_orders = orders.copy()
@@ -140,9 +140,10 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
     improvement_list= []
     iteration_list = []
     improvement_index = 0
+    count_iteration = 0
     for iteration in range(max_iterations):
         improved = False
-
+        count_iteration += 1
         # Try swapping each pair of orders
         for i in range(len(current_orders)):
             for j in range(i + 1, len(current_orders)):
@@ -165,21 +166,22 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
                     # Swap back if not improving
                     current_orders[i], current_orders[j] = current_orders[j], current_orders[i]
                     improvement_list.append(current_penalty)
+                    improvement_index += 1
                     iteration_list.append(improvement_index)
 
         # If no improvements found in an iteration, we can stop
         if not improved:
             break
 
-    return current_schedule, current_penalty, improvement_list, iteration_list
+    return current_schedule, current_penalty, improvement_list, iteration_list, count_iteration
 
 # Run the swap orders optimization
-optimized_schedule, optimized_penalty, list_of_improvement, list_iteration = swap_orders_optimization(orders, machines)
+optimized_schedule, optimized_penalty, list_of_improvement, list_iteration, count_it = swap_orders_optimization(orders, machines)
 
-machine_schedules = convert_sched_O_to_sched_M(optimized_schedule)
-
+#draw_schedule(machine_schedules)
 draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
-print(f"Optimized penalty achieved: {optimized_penalty}")
-print(penalty1, optimized_penalty)
+#print(f"Optimized penalty achieved: {optimized_penalty}")
+print(penalty1, optimized_penalty, count_it)
 plt.scatter(list_iteration, list_of_improvement, marker='o')
+plt.title('Improvement per iteration')
 plt.show()
