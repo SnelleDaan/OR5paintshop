@@ -1,11 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 # Load data from Excel
 file = 'PaintShop - November 2024.xlsx'
 df = pd.read_excel(file, sheet_name=0)
-orders  = df.to_dict(orient='records')
+orders = df.to_dict(orient='records')
 
 df2 = pd.read_excel(file, sheet_name=1)
 machines = {}
@@ -36,8 +37,6 @@ def switchtime(prev_color, current_color):
 # Function to schedule orders
 def schedule_orders(orders, machines):
     schedule_O = []
-
-    # Track each machine's state: current color and available time
     machine_states = {machine: {'current_color': None, 'available_time': 0} for machine in machines}
 
     for order in orders:
@@ -45,24 +44,22 @@ def schedule_orders(orders, machines):
         best_time = float('inf')
         best_start_time = None
         
-        # Iterate over each machine and evaluate the schedule
         for machine_name, machine_data in machines.items():
             current_machine = machine_states[machine_name]
-            switch_time = switchtime(current_machine['current_color'], order['Colour']) 
-            paint_time = painttime(order['Surface'], machine_name, machines)
+            switch_time_cost = switchtime(current_machine['current_color'], order['Colour']) 
+            paint_time_cost = painttime(order['Surface'], machine_name, machines)
             start_time = current_machine['available_time']  # Directly use the machine's available time
-            completion_time = start_time + switch_time + paint_time
+            completion_time = start_time + switch_time_cost + paint_time_cost
             
             # Choose the best machine based on the earliest completion time
             if completion_time < best_time:
                 best_time = completion_time
                 best_machine = machine_name
                 best_start_time = start_time
-                best_paint_time = paint_time
-                best_switch_time = switch_time
+                best_paint_time = paint_time_cost
 
         # Append the scheduled order details
-        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'], best_paint_time, best_start_time + best_switch_time])
+        schedule_O.append([order['Order'], best_machine, best_time, order['Colour'].lower(), best_paint_time, best_start_time + switch_time_cost])
 
         # Update the chosen machine's state (availability and current color)
         machine_states[best_machine]['available_time'] = best_time
@@ -75,7 +72,7 @@ def convert_sched_O_to_sched_M(schedule_O):
     schedule_M = {machine: [] for machine in machines}
     for entry in schedule_O:
         order_index, machine_name, end_time, color, duration, start_time = entry
-        schedule_M[machine_name].append((order_index, end_time, color.lower(), duration, start_time))
+        schedule_M[machine_name].append((order_index, end_time, color, duration, start_time))
     return schedule_M
 
 # Calculate penalties for late orders
@@ -89,10 +86,9 @@ def calculate_penalty(orders, schedule):
     return penalty
 
 # Draw a Gantt chart of the schedule
-def draw_schedule(machine_schedules):
+def draw_schedule(machine_schedules, title):
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    # Loop through each machine's schedule
     for i, (machine_name, machine_schedule) in enumerate(machine_schedules.items()):
         for order_num, completion_time, color, duration, start_time in machine_schedule:
             width = duration  # The completion time is the total time spent on the order
@@ -102,20 +98,11 @@ def draw_schedule(machine_schedules):
     ax.set_yticks(range(1, len(machine_schedules) + 1))
     ax.set_yticklabels([f'Machine {i + 1}' for i in range(len(machine_schedules))])
     ax.set_xlabel('Time')
-    ax.set_title('Gantt Chart of Orders for Each Machine')
+    ax.set_title(title)
 
     plt.grid(axis='x', linestyle='--', alpha=0.7)
     plt.tight_layout()
     plt.show()
-
-# Run the initial scheduling process
-schedule1_O = schedule_orders(orders, machines)
-machine_schedules = convert_sched_O_to_sched_M(schedule1_O)
-draw_schedule(machine_schedules)
-
-# Calculate and print the penalty for the initial schedule
-penalty1 = calculate_penalty(orders, schedule1_O)
-print(f"Initial penalty: {penalty1}")
 
 # Function for 2-opt improving search heuristic
 def swap_orders_optimization(orders, machines, max_iterations=1000):
@@ -123,9 +110,12 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
     current_schedule = schedule_orders(current_orders, machines)
     current_penalty = calculate_penalty(current_orders, current_schedule)
 
+    improvement_list = []
+    iteration_list = []
+    improvement_index = 0
+
     for iteration in range(max_iterations):
         improved = False
-
         # Try swapping each pair of orders
         for i in range(len(current_orders)):
             for j in range(i + 1, len(current_orders)):
@@ -140,6 +130,9 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
                 if new_penalty < current_penalty:
                     current_penalty = new_penalty
                     current_schedule = new_schedule
+                    improvement_list.append(current_penalty)
+                    improvement_index += 1
+                    iteration_list.append(improvement_index)
                     improved = True
                 else:
                     # Swap back if not improving
@@ -149,12 +142,30 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
         if not improved:
             break
 
-    return current_schedule, current_penalty
+    return current_schedule, current_penalty, improvement_list, iteration_list
+
+# Run the initial scheduling process
+schedule1_O = schedule_orders(orders, machines)
+penalty1 = calculate_penalty(orders, schedule1_O)
 
 # Run the 2-opt optimization
-optimized_schedule_2opt, optimized_penalty_2opt = swap_orders_optimization(orders, machines)
+optimized_schedule_2opt, optimized_penalty_2opt, list_of_improvement, list_iteration = swap_orders_optimization(orders, machines)
 
-# Visualize and print the optimized schedule from 2-opt
+# Convert schedules for plotting
+machine_schedules_initial = convert_sched_O_to_sched_M(schedule1_O)
 machine_schedules_2opt = convert_sched_O_to_sched_M(optimized_schedule_2opt)
-draw_schedule(machine_schedules_2opt)
+
+# Draw initial and optimized schedules
+draw_schedule(machine_schedules_initial, "Initial Schedule Gantt Chart")
+draw_schedule(machine_schedules_2opt, "Optimized Schedule (2-opt) Gantt Chart")
+
+# Print the penalty results
+print(f"Initial penalty: {penalty1}")
 print(f"Optimized penalty (2-opt): {optimized_penalty_2opt}")
+
+# Plot the improvement per iteration
+plt.scatter(list_iteration, list_of_improvement, marker='o')
+plt.title('Improvement per Iteration')
+plt.xlabel('Iteration')
+plt.ylabel('Penalty')
+plt.show()
