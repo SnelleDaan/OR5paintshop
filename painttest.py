@@ -191,20 +191,20 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
 
 def random_schedule(orders):
     
-    random_orders = random.sample(len(orders), len(orders))
+    random_orders = random.sample(orders, len(orders))
 
     
     return random_orders
 # Run the swap orders optimization
 optimized_schedule, optimized_penalty, list_of_improvement, list_iteration, count_it = swap_orders_optimization(orders, machines)
 random_schedule(orders)
-#draw_schedule(machine_schedules)
-# draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
-# #print(f"Optimized penalty achieved: {optimized_penalty}")
-# print(penalty1, optimized_penalty, count_it)
+draw_schedule(machine_schedules)
+draw_schedule(convert_sched_O_to_sched_M(optimized_schedule))
+print(f"Optimized penalty achieved: {optimized_penalty}")
+print(penalty1, optimized_penalty, count_it)
 # print(min(list_of_improvement))
-# plt.scatter(list_iteration, list_of_improvement, marker='o')
-# plt.title('Improvement per iteration')
-# plt.xlabel('iteration')
-# plt.ylabel('penalty')
-# plt.show()
+plt.scatter(list_iteration, list_of_improvement, marker='o')
+plt.title('Improvement per iteration')
+plt.xlabel('iteration')
+plt.ylabel('penalty')
+plt.show()
