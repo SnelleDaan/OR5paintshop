@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 
-# Reading the data from the Excel file
+# Reading Excel data
 file = 'PaintShop - November 2024.xlsx'
 df = pd.read_excel(file, sheet_name=0)
 orders  = df.to_dict(orient='records')
@@ -20,7 +20,7 @@ for prev_color, current_color, interval in kleurwissels:
     setup_times[color_pair] = interval
 
 
-# Helper functions
+# Function defining
 def painttime(area, machine, machines):
     for machine_name, machine_data in machines.items():
         if machine == machine_name:
@@ -123,7 +123,7 @@ def draw_schedule(schedule):
     return plt.show()
 
 
-# 2-opt Swap Optimization
+# 2-opt Swap Improving Search
 def swap_orders_optimization(orders, machines, max_iterations=1000):
     current_orders = orders.copy()
     current_schedule = schedule_orders(current_orders, machines)
@@ -162,7 +162,7 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
     return current_schedule, current_penalty, improvement_list, iteration_list, count_iteration
 
 
-# Tabu Search Optimization
+# Tabu Search
 def tabu_search_optimization(orders, machines, max_iterations=1000, tabu_tenure=10):
     current_orders = orders.copy()
     current_schedule = schedule_orders(current_orders, machines)
@@ -234,29 +234,27 @@ def tabu_search_optimization(orders, machines, max_iterations=1000, tabu_tenure=
     return best_schedule, best_penalty, improvement_list, iteration_list, count_iteration
 
 
-# Running both optimization methods separately
-
-# Run 2-opt swap optimization
+# Run 2-opt swap
 basic_schedule, basic_penalty, basic_improvement, basic_iteration, basic_count = swap_orders_optimization(orders, machines)
 
-# Run Tabu Search optimization
+# Run Tabu Search
 tabu_schedule, tabu_penalty, tabu_improvement, tabu_iteration, tabu_count = tabu_search_optimization(orders, machines)
 
-# Draw Gantt charts for both schedules
+# Gannt charts
 draw_schedule(convert_sched_O_to_sched_M(basic_schedule))  # Basic optimization schedule
 draw_schedule(convert_sched_O_to_sched_M(tabu_schedule))   # Tabu Search schedule
 
-# Print penalties for both methods
+# Print penalties
 print(f"Basic Swap Optimization Penalty: {basic_penalty}")
 print(f"Tabu Search Optimization Penalty: {tabu_penalty}")
 
-# Scatter plot to visualize improvement over iterations for both methods
+# Scatter plot to visualize improvement
 plt.figure(figsize=(10, 6))
 
-# 2-opt swap optimization improvements
+# 2-opt swap improvements
 plt.plot(basic_iteration, basic_improvement, label='2-opt Swap Optimization', marker='o')
 
-# Tabu Search optimization improvements
+# Tabu Search improvements
 plt.plot(tabu_iteration, tabu_improvement, label='Tabu Search Optimization', marker='x')
 
 plt.title('Penalty Improvement over Iterations')
@@ -266,6 +264,6 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# Print iteration counts for both methods
+# Print iteration counts
 # print(f"Total iterations for 2-opt Swap Optimization: {basic_count}")
 # print(f"Total iterations for Tabu Search Optimization: {tabu_count}")
