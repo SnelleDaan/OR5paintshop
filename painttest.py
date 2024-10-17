@@ -125,14 +125,22 @@ def draw_schedule(schedule):
     # schedule has to be of machince type
     # Create a figure and axis for plotting
     fig, ax = plt.subplots(figsize=(12, 6))
-
+    
     # Loop through each machine's schedule
     for i, machine_schedule in enumerate(schedule):
+        previous_end_time = 0  # Track end time of previous order
+        
         for order_num, completion_time, color, duration, start_time,deadline in machine_schedule:
+            
+            if start_time > previous_end_time:
+                gap = start_time - previous_end_time
+                ax.barh(i + 1, gap, left=previous_end_time, color='grey', edgecolor='black')
             # Calculate the width (duration) of each order
             width =  duration # The completion time is the total time spent on the order
             ax.barh(i + 1, width, left=start_time, color=color, edgecolor='black', label=color if i == 0 else "")
             ax.text(start_time + width / 2, i + 1, order_num, va='center', ha='center', color='white')  # Add order number to the bar
+            
+            previous_end_time = start_time + duration
 
     # Add labels and title
     ax.set_yticks(range(1, len(schedule) + 1))
