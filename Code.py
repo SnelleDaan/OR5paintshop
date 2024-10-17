@@ -267,5 +267,5 @@ plt.grid(True)
 plt.show()
 
 # Print iteration counts for both methods
-print(f"Total iterations for 2-opt Swap Optimization: {basic_count}")
-print(f"Total iterations for Tabu Search Optimization: {tabu_count}")
+# print(f"Total iterations for 2-opt Swap Optimization: {basic_count}")
+# print(f"Total iterations for Tabu Search Optimization: {tabu_count}")
