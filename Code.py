@@ -163,7 +163,7 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
 
 
 # Tabu Search
-def tabu_search_optimization(orders, machines, max_iterations=1000, tabu_tenure=10):
+def tabu_search_optimization(orders, machines, max_iterations=10, tabu_tenure=10):
     current_orders = orders.copy()
     current_schedule = schedule_orders(current_orders, machines)
     current_penalty = calculate_penalty(current_orders, current_schedule)
@@ -202,6 +202,13 @@ def tabu_search_optimization(orders, machines, max_iterations=1000, tabu_tenure=
                     best_new_penalty = new_penalty
                     best_move = (i, j)
                     improved = True
+                    improvement_list.append(current_penalty)
+                    improvement_index += 1
+                    iteration_list.append(improvement_index)
+                else:
+                    improvement_list.append(current_penalty)
+                    improvement_index += 1
+                    iteration_list.append(improvement_index)
 
                 current_orders[i], current_orders[j] = current_orders[j], current_orders[i]
 
@@ -222,10 +229,6 @@ def tabu_search_optimization(orders, machines, max_iterations=1000, tabu_tenure=
                 best_orders = current_orders.copy()
                 best_schedule = current_schedule.copy()
 
-        improvement_list.append(current_penalty)
-        improvement_index += 1
-        iteration_list.append(improvement_index)
-
         tabu_list = [move for move in tabu_list if iteration - tabu_tenure_dict[move] < tabu_tenure]
 
         if not improved:
@@ -241,6 +244,7 @@ basic_schedule, basic_penalty, basic_improvement, basic_iteration, basic_count =
 tabu_schedule, tabu_penalty, tabu_improvement, tabu_iteration, tabu_count = tabu_search_optimization(orders, machines)
 
 # Gannt charts
+draw_schedule(convert_sched_O_to_sched_M(schedule_orders(orders,machines))) # starting point
 draw_schedule(convert_sched_O_to_sched_M(basic_schedule))  # Basic optimization schedule
 draw_schedule(convert_sched_O_to_sched_M(tabu_schedule))   # Tabu Search schedule
 
