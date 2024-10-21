@@ -195,7 +195,7 @@ def swap_orders_optimization(orders, machines, max_iterations=1000):
 
 
 # Tabu Search
-def tabu_search_optimization(orders, machines, max_iterations=10, tabu_tenure=10):
+def tabu_search_optimization(orders, machines, max_iterations=20, tabu_tenure=10):
     current_orders = orders.copy()
     current_schedule = schedule_orders(current_orders, machines)
     current_penalty = calculate_penalty(current_orders, current_schedule)
