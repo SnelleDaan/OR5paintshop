@@ -35,14 +35,10 @@ def switchtime(prev_color, current_color):
     return 0
 
 def machine_to_index(Mx):
-    if Mx == 'M1':
-        return 0
-    elif Mx == 'M2':
-        return 1
-    elif Mx == 'M3':
-        return 2
-    elif Mx == 'M4':
-        return 3
+    if Mx.startswith('M') and Mx[1:].isdigit():
+        return int(Mx[1:]) - 1
+    else:
+        raise ValueError("Invalid input format. Expected 'M' followed by a number.")
 
 def index_to_machine(index):
     return [f'M{index + 1}']
@@ -51,7 +47,9 @@ def index_to_machine(index):
 def schedule_orders(orders, machines):
     schedule_O = []
     machine_states = {machine: {'current_color': None, 'available_time': 0} for machine in machines}
-    machine_time = [0, 0, 0, 0]
+    machine_time = []
+    for machine in machines:
+        machine_time.append(0)
 
     for order in orders:
         best_machine = None
@@ -82,7 +80,9 @@ def schedule_orders(orders, machines):
 
 
 def convert_sched_O_to_sched_M(schedule_O):
-    schedule_M = [[], [], [], []]
+    schedule_M = []
+    for i in range(len(machines)):
+        schedule_M.append([])
     for entry in schedule_O:
         order_index = entry[0]
         end_time = entry[2]
