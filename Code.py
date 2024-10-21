@@ -46,7 +46,8 @@ def index_to_machine(index):
 
 def schedule_orders(orders, machines):
     schedule_O = []
-    machine_states = {machine: {'current_color': None, 'available_time': 0} for machine in machines}
+    sched_for_excel = []
+    machine_states = {machine: {'current_color': None, 'available_time': 0, 'seq_no': 0} for machine in machines}
     machine_time = []
     for machine in machines:
         machine_time.append(0)
@@ -70,11 +71,42 @@ def schedule_orders(orders, machines):
                 best_start_time = start_time
                 best_paint_time = paint_time
                 best_switch_time = switch_time
-
+        # Calculate additional values like lateness, penalty, and cost        
+        lateness = max(0, best_time - order['Deadline'])
+        penalty_per_unit = order['Penalty']
+        penalty_cost = lateness * penalty_per_unit
+        
+        # Update sequence number for the machine
+        machine_states[best_machine]['seq_no'] += 1
+        sequence_number = machine_states[best_machine]['seq_no']
+        
+        # Schudule format = 'Order index,   machine,      end time,       colour,          duration,         start time                          , deadline
         schedule_O.append([order['Order'], best_machine, best_time, order['Colour'].lower(), best_paint_time, best_start_time + best_switch_time, order['Deadline']])
+        
+        sched_for_excel.append({
+            'Order': order['Order'],
+            'Machine': best_machine,
+            'SeqNo': sequence_number,
+            'Setup': best_switch_time,
+            'Start': best_start_time + best_switch_time,
+            'Process': best_paint_time,
+            'End': best_time,
+            'Deadline': order['Deadline'],
+            'Lateness': lateness,
+            'Penalty': penalty_per_unit,
+            'Cost': penalty_cost
+        })
         machine_time[machine_to_index(best_machine)] = best_time
         machine_states[best_machine]['available_time'] = best_time
         machine_states[best_machine]['current_color'] = order['Colour']
+        
+    # Create a pandas DataFrame to save the data into an Excel sheet
+    df = pd.DataFrame(sched_for_excel, columns=[
+        'Order', 'Machine', 'SeqNo', 'Setup', 'Start', 'Process', 'End', 'Deadline', 'Lateness', 'Penalty', 'Cost'
+    ])
+
+    # Save the schedule to an Excel file with a worksheet named 'Schedule'
+    df.to_excel('schedule_output.xlsx', sheet_name='Schedule', index=False)
     
     return schedule_O
 
