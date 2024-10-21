@@ -236,6 +236,8 @@ def tabu_search_optimization(orders, machines, max_iterations=10, tabu_tenure=10
 
     return best_schedule, best_penalty, improvement_list, iteration_list, count_iteration
 
+# Run start point 
+penalty_start = calculate_penalty(orders, schedule_orders(orders, machines))
 
 # Run 2-opt swap
 basic_schedule, basic_penalty, basic_improvement, basic_iteration, basic_count = swap_orders_optimization(orders, machines)
@@ -249,6 +251,7 @@ draw_schedule(convert_sched_O_to_sched_M(basic_schedule))  # Basic optimization 
 draw_schedule(convert_sched_O_to_sched_M(tabu_schedule))   # Tabu Search schedule
 
 # Print penalties
+print(f"Starting point: {penalty_start}")
 print(f"Basic Swap Optimization Penalty: {basic_penalty}")
 print(f"Tabu Search Optimization Penalty: {tabu_penalty}")
 
